@@ -1,3 +1,4 @@
+import { IncomingHttpHeaders } from 'http';
 import {
   UserDocument,
   CreateUserInput,
@@ -5,11 +6,12 @@ import {
   LoginUserReturnType,
   ReturnType,
 } from 'src/types/userType';
-import generateJwtToken from '../utils/generateJwtToken';
+import { generateJwtToken, checkToken } from '../utils/generateJwtToken';
 
 import User from '../models/userModel';
 import getHashedPassword from '../utils/getHashedPassword';
 import validatePassword from '../utils/validatePassword';
+
 
 // Create new user
 export async function createUser(
@@ -92,5 +94,44 @@ export async function signInUser(
     status: 200,
     message: 'Login success.',
     data: user,
+  };
+}
+
+export async function getUser(
+  userCredentials: IncomingHttpHeaders
+): Promise<ReturnType<Omit<UserDocument, 'password'>>> {
+  const token: string | undefined = userCredentials.authorization?.replace(
+    'Bearer ',
+    ''
+  );
+
+  if (!token)
+    return {
+      success: false,
+      status: 403,
+      message: 'Invalid, expired or missing token',
+      data: null,
+    };
+
+  const res = checkToken(token);
+
+  const currentUser = await User.findOne({ email: res });
+  delete currentUser?.password;
+
+  if (!currentUser) {
+    return {
+      success: false,
+      status: 401,
+      message:
+        'No account is associate with enterd email, Try creating account.',
+      data: null,
+    };
+  }
+
+  return {
+    success: true,
+    status: 200,
+    message: 'user ifno',
+    data: currentUser,
   };
 }

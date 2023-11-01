@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken';
+import jwt, { Jwt, JwtPayload } from 'jsonwebtoken';
 import { UserDocument } from '../types/userType';
 
-function generateJwtToken(user: UserDocument): string {
+export function generateJwtToken(user: UserDocument): string {
   return jwt.sign(
     {
       id: user.id,
@@ -15,4 +15,10 @@ function generateJwtToken(user: UserDocument): string {
   );
 }
 
-export default generateJwtToken;
+export function checkToken(token: string): string {
+  const status = <JwtPayload>(
+    jwt.verify(token, <string>process.env.JWT_SECRET_KEY)
+  );
+
+  return status.email;
+}

@@ -159,3 +159,6 @@ dist
 .webpack/
 
 # End of https://www.toptal.com/developers/gitignore/api/node,linux,dotenv,git
+
+.idea/
+build/
